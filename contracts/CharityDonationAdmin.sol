@@ -30,15 +30,15 @@ contract CharityDonationAdmin is CharityDonationStorage, CharityDonationEvents {
         emit AddAdmin(_admin);
     }
 
-    
     //Remove Campaign Admin
     function removeCampaignAdmin(address _admin ) external {
         //check if address is an admin
         require(admins[msg.sender][_admin],"This Address Is Not An Admin!");
 
         //remove admin
-        admins[msg.sender][_admin] = false;    
+        admins[msg.sender][_admin] = false;
 
+        /*
         address[] storage campaignadmins = campaignAdmins[msg.sender];
         for (uint256 i; i < campaignadmins.length; i++) {
             if (campaignadmins[i] == _admin) {
@@ -49,6 +49,7 @@ contract CharityDonationAdmin is CharityDonationStorage, CharityDonationEvents {
                 break;
             }
         }
+        */
 
         //emit event
         emit RemoveAdmin(_admin);
