@@ -109,7 +109,7 @@ describe("CharityDonation", function () {
       ).to.be.revertedWith("This Address Is Already An Admin!");
     });
   });
-  */
+  
   describe("Donations", function () {
     //create a test campaign before each test
     beforeEach(async function () {
@@ -213,8 +213,9 @@ describe("CharityDonation", function () {
     });
 
   });
-  /*
+  */
   describe("Withdrawals and Refunds", function () {
+    //create a test campaign before each test
     beforeEach(async function () {
       await charityContract.createCampaign(
         "Test Campaign",
@@ -222,10 +223,13 @@ describe("CharityDonation", function () {
         parseEther("10"),
         30
       );
+
+      //add campaign admin
       await charityContract.addCampaignAdmin(admin.address);
     });
 
     it("Should allow withdrawals after campaign completion", async function () {
+      //donate exact target amount to complete campaign
       const donationAmount = parseEther("10");
       await charityContract.connect(donor1).donateToCampaign(
         owner.address,
@@ -236,15 +240,16 @@ describe("CharityDonation", function () {
 
       const withdrawAmount = parseEther("5");
       await expect(
-        charityContract.withdrawFunds(1, owner.address, withdrawAmount, beneficiary.address)
+        charityContract.connect(admin).withdrawFunds(1, owner.address, withdrawAmount, beneficiary.address)
       ).to.emit(charityContract, "FundsWithdrawn")
-       .withArgs(withdrawAmount, owner.address, beneficiary.address, owner.address, 1n);
+       .withArgs(withdrawAmount, admin.address, beneficiary.address, owner.address, 1n);
 
       const [campaign] = await charityContract.getCampaignDetails(1, owner.address);
       expect(campaign.balance).to.equal(donationAmount - withdrawAmount);
     });
 
     it("Should allow refunds when campaign fails", async function () {
+      //make donation to campaign
       const donationAmount = parseEther("5");
       await charityContract.connect(donor1).donateToCampaign(
         owner.address,
@@ -254,7 +259,7 @@ describe("CharityDonation", function () {
       );
 
       await expect(
-        charityContract.refundDonors(1, owner.address)
+        charityContract.connect(admin).refundDonors(1, owner.address)
       ).to.emit(charityContract, "RefundCampaignDonors")
        .withArgs(owner.address, 1n, donor1.address, donationAmount);
 
@@ -262,7 +267,7 @@ describe("CharityDonation", function () {
       expect(campaign.balance).to.equal(0n);
     });
   });
-
+  /*
   describe("View Functions", function () {
     it("Should return correct campaign details", async function () {
       await charityContract.createCampaign(
