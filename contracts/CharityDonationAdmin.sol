@@ -60,12 +60,12 @@ contract CharityDonationAdmin is CharityDonationStorage, CharityDonationEvents {
         //check if campaign has not yet raised any coins and if its still active
         Campaign memory thisCampaign = campaigns[_campaignAddress][_campaignId-1];
         require(
-            thisCampaign.balance == 0, 
-            "This Campaign Has Already Raised Funds! Refund First Then Cancel!"
-        );
-        require(
             !thisCampaign.isCompleted, 
             "This Campaign Has Already Been Completed!"
+        );
+        require(
+            thisCampaign.balance == 0, 
+            "This Campaign Has Already Raised Funds! Refund First Then Cancel!"
         );
 
         //deactivate the campaign 

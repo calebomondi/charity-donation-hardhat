@@ -25,7 +25,7 @@ describe("CharityDonation", function () {
     await charityContract.waitForDeployment();
   });
   /*
-  describe("Campaign Creation", function () {
+  describe("Campaign Creation Management", function () {
     it("Should create a new campaign successfully", async function () {
       const title = "Test Campaign";
       const description = "Test Description";
@@ -64,7 +64,7 @@ describe("CharityDonation", function () {
       await expect(newCampaign)
         .to.emit(charityContract, "CampaignCreated")
         .withArgs(1n, owner.address, title, target, campaigns[0].deadline);
-    });
+    }); 
 
     it("Should not allow duplicate campaign titles", async function () {
       //create campaign that already exists
@@ -117,7 +117,7 @@ describe("CharityDonation", function () {
     });
   });
   
-  describe("Donations", function () {
+  describe("Donations Management", function () {
     //create a test campaign before each test
     beforeEach(async function () {
       await charityContract.createCampaign(
@@ -221,7 +221,7 @@ describe("CharityDonation", function () {
 
   });
   
-  describe("Withdrawals and Refunds", function () {
+  describe("Withdrawals and Refunds Management", function () {
     //create a test campaign before each test
     beforeEach(async function () {
       await charityContract.createCampaign(
@@ -291,7 +291,7 @@ describe("CharityDonation", function () {
       expect(campaign.balance).to.equal(0n);
     });
   });
-  */
+  
   describe("View Functions", function () {
     //create a test campaign before each test
     beforeEach(async function () {
@@ -343,6 +343,110 @@ describe("CharityDonation", function () {
       expect(donations.length).to.equal(1);
       expect(donations[0].amount).to.equal(donationAmount);
     });
+
+    it("Should keep records of all the campaigns", async function () {
+      //create a 2nd campaign
+      await charityContract.createCampaign(
+        "Test Campaign 2",
+        "Description",
+        parseEther("10"),
+        30
+      );
+
+      //check if both campaigns are tracked
+      const campaigns = await charityContract.viewCampaigns();
+      expect(campaigns.length).to.equal(2);
+      expect(campaigns[0].title).to.equal("Test Campaign");
+      expect(campaigns[1].title).to.equal("Test Campaign 2");
+    });
+
+    it("Should track all withdrawals from a campaign", async function () {
+      //donate to campaign and complete it
+      const donationAmount = parseEther("10");
+      await charityContract.connect(donor1).donateToCampaign(
+        owner.address,
+        1,
+        donationAmount,
+        { value: donationAmount }
+      );
+
+      //add admin to campaign admin list and withdraw funds
+      charityContract.addCampaignAdmin(admin.address);
+
+      //withdraw funds and check if withdrawal is tracked
+      const withdrawAmount = parseEther("1");
+      await charityContract.connect(admin).withdrawFunds(1, owner.address, withdrawAmount, beneficiary.address);
+
+      const [withdrawals] = await charityContract.viewWithdrawals(owner.address);
+      expect(withdrawals.length).to.equal(1);
+      expect(withdrawals[0].amount).to.equal(withdrawAmount);
+      expect(withdrawals[0].to).to.equal(beneficiary.address);
+    });
   });
-  
+  */
+  describe("Cancel Campaign Management", function () {
+    //create a test campaign before each test
+    beforeEach(async function () {
+      await charityContract.createCampaign(
+        "Test Campaign",
+        "Description",
+        parseEther("10"),
+        30
+      );
+
+      //add campaign admin
+      await charityContract.addCampaignAdmin(admin.address);
+    });
+
+    it("Should cancel a campaign successfully", async function () {
+      //cancel campaign and check if event was emitted as expected
+      await expect(
+        charityContract.connect(admin).cancelCampaign(1, owner.address)
+      ).to.emit(charityContract, "CampaignCancelled")
+       .withArgs(owner.address, 1n);
+
+      //check if campaign was cancelled
+      const [campaign] = await charityContract.getCampaignDetails(1, owner.address);
+      expect(campaign.isCancelled).to.be.true;
+    });
+
+    it("Should not allow a campaign to be cancelled by non-admin", async function () {
+      //verify that cancelling a campaign by non-admin fails
+      await expect(
+        charityContract.connect(donor1).cancelCampaign(1, owner.address)
+      ).to.be.revertedWith("Only Admins Can Perform This Action!");
+    });    
+
+    it("Should not allow a campaign to be cancelled if it has raised funds", async function () {
+      //donate to campaign
+      const donationAmount = parseEther("5");
+      await charityContract.connect(donor1).donateToCampaign(
+        owner.address,
+        1,
+        donationAmount,
+        { value: donationAmount }
+      );
+
+      //verify that cancelling a campaign with raised funds fails
+      await expect(
+        charityContract.connect(admin).cancelCampaign(1, owner.address)
+      ).to.be.revertedWith("This Campaign Has Already Raised Funds! Refund First Then Cancel!");
+    });
+
+    it("Should not allow a campaign to be cancelled if it is completed", async function () {
+      //donate to campaign to complete it
+      const donationAmount = parseEther("10");
+      await charityContract.connect(donor1).donateToCampaign(
+        owner.address,
+        1,
+        donationAmount,
+        { value: donationAmount }
+      );
+
+      //verify that cancelling a completed campaign fails
+      await expect(
+        charityContract.connect(admin).cancelCampaign(1, owner.address)
+      ).to.be.revertedWith("This Campaign Has Already Raised Funds! Refund First Then Cancel!");
+    });
+  });
 });
