@@ -56,7 +56,7 @@ contract CharityDonationCore is CharityDonationAdmin {
         );
         require(
             !campaigns[_campaignAddress][_campaignId-1].isCompleted, 
-            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Has Been Cancelled!"))
+            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Has Already Been Completed!"))
         );
 
         //check if donation amount is greater than 0 and that _amount  == msg.value
