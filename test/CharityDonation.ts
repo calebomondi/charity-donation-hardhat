@@ -108,6 +108,13 @@ describe("CharityDonation", function () {
         charityContract.addCampaignAdmin(admin.address)
       ).to.be.revertedWith("This Address Is Already An Admin!");
     });
+
+    it("Should not allow address to be removed as admin if address is not an admin", async function () {
+      //verify that removing an address that is not an admin fails
+      await expect(
+        charityContract.removeCampaignAdmin(admin.address)
+      ).to.be.revertedWith("This Address Is Not An Admin!");
+    });
   });
   
   describe("Donations", function () {
@@ -213,7 +220,7 @@ describe("CharityDonation", function () {
     });
 
   });
-  */
+  
   describe("Withdrawals and Refunds", function () {
     //create a test campaign before each test
     beforeEach(async function () {
@@ -284,7 +291,7 @@ describe("CharityDonation", function () {
       expect(campaign.balance).to.equal(0n);
     });
   });
-  /*
+  */
   describe("View Functions", function () {
     it("Should return correct campaign details", async function () {
       await charityContract.createCampaign(
@@ -330,5 +337,5 @@ describe("CharityDonation", function () {
       expect(donations[0].amount).to.equal(donationAmount);
     });
   });
-  */
+  
 });
