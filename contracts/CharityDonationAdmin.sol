@@ -55,7 +55,6 @@ contract CharityDonationAdmin is CharityDonationStorage, CharityDonationEvents {
         emit RemoveAdmin(_admin);
     }
     
-
     //cancel  campaign before it starts
     function cancelCampaign(uint256 _campaignId, address _campaignAddress) external  onlyAdmins(_campaignAddress, _campaignId) {
         //check if campaign has not yet raised any coins and if its still active

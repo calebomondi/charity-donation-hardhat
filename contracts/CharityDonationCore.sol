@@ -52,11 +52,11 @@ contract CharityDonationCore is CharityDonationAdmin {
         );
         require(
             !campaigns[_campaignAddress][_campaignId-1].isCancelled, 
-            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Was Cancalled!"))
+            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Has Been Cancelled!"))
         );
         require(
             !campaigns[_campaignAddress][_campaignId-1].isCompleted, 
-            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Was Completed!"))
+            string(abi.encodePacked("'",campaigns[_campaignAddress][_campaignId-1].title, "' Campaign Has Been Cancelled!"))
         );
 
         //check if donation amount is greater than 0 and that _amount  == msg.value
