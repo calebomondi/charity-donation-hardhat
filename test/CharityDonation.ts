@@ -293,14 +293,18 @@ describe("CharityDonation", function () {
   });
   */
   describe("View Functions", function () {
-    it("Should return correct campaign details", async function () {
+    //create a test campaign before each test
+    beforeEach(async function () {
       await charityContract.createCampaign(
         "Test Campaign",
         "Description",
         parseEther("10"),
         30
       );
+    });
 
+    it("Should return correct campaign details", async function () {
+      //donate to campaign, 2 different donors
       const donationAmount = parseEther("1");
       await charityContract.connect(donor1).donateToCampaign(
         owner.address,
@@ -309,21 +313,24 @@ describe("CharityDonation", function () {
         { value: donationAmount }
       );
 
-      const [campaign, donorsCount, donors] = await charityContract.getCampaignDetails(1, owner.address);
-      expect(campaign.title).to.equal("Test Campaign");
-      expect(donorsCount).to.equal(1n);
-      expect(donors[0].by).to.equal(donor1.address);
-      expect(donors[0].amount).to.equal(donationAmount);
-    });
-
-    it("Should track donations correctly", async function () {
-      await charityContract.createCampaign(
-        "Test Campaign",
-        "Description",
-        parseEther("10"),
-        30
+      await charityContract.connect(donor2).donateToCampaign(
+        owner.address,
+        1,
+        donationAmount,
+        { value: donationAmount }
       );
 
+      //check if campaign details are correct
+      const [campaign, donorsCount, donors] = await charityContract.getCampaignDetails(1, owner.address);
+      expect(campaign.title).to.equal("Test Campaign");
+      expect(donorsCount).to.equal(2n);
+      expect(donors[0].by).to.equal(donor1.address);
+      expect(donors[0].amount).to.equal(donationAmount);
+      expect(donors[1].by).to.equal(donor2.address);
+    });
+
+    it("Should track donors donations correctly", async function () {
+      //donate to campaign and check if donation is tracked
       const donationAmount = parseEther("1");
       await charityContract.connect(donor1).donateToCampaign(
         owner.address,
