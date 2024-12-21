@@ -1,18 +1,19 @@
 {
-  "name": "hardhattemplatets",
+  "name": "charitydonationsmartcontract",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "Caleb Mokua & HardHat Nomic Foundation ;-)",
+  "author": "Caleb Mokua",
   "license": "ISC",
   "type": "commonjs",
   "description": "A Hardhat Template That Uses TypeScript",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.17"
+    "hardhat": "^2.22.17",
+    "solidity-coverage": "^0.8.14"
   },
   "dependencies": {
     "dotenv": "^16.4.7"
