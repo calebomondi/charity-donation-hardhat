@@ -248,6 +248,23 @@ describe("CharityDonation", function () {
       expect(campaign.balance).to.equal(donationAmount - withdrawAmount);
     });
 
+    it("Should not allow withdrawals from an active completion", async function () {
+      //donate to campaign but do not complete it
+      const donationAmount = parseEther("3");
+      await charityContract.connect(donor1).donateToCampaign(
+        owner.address,
+        1,
+        donationAmount,
+        { value: donationAmount }
+      );
+
+      //try to withdraw before campaign completion
+      const withdrawAmount = parseEther("5");
+      await expect(
+        charityContract.connect(admin).withdrawFunds(1, owner.address, withdrawAmount, beneficiary.address)
+      ).to.be.revertedWith("You Can't Withdraw Funds from an Active Campaign");
+    });
+
     it("Should allow refunds when campaign fails", async function () {
       //make donation to campaign
       const donationAmount = parseEther("5");
