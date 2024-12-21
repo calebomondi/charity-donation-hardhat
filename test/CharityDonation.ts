@@ -24,7 +24,7 @@ describe("CharityDonation", function () {
     charityContract = await CharityDonationFactory.deploy() as unknown as CharityDonationMain;
     await charityContract.waitForDeployment();
   });
-  /*
+  
   describe("Campaign Creation Management", function () {
     it("Should create a new campaign successfully", async function () {
       const title = "Test Campaign";
@@ -383,7 +383,7 @@ describe("CharityDonation", function () {
       expect(withdrawals[0].to).to.equal(beneficiary.address);
     });
   });
-  */
+  
   describe("Cancel Campaign Management", function () {
     //create a test campaign before each test
     beforeEach(async function () {
@@ -417,7 +417,7 @@ describe("CharityDonation", function () {
       ).to.be.revertedWith("Only Admins Can Perform This Action!");
     });    
 
-    it("Should not allow a campaign to be cancelled if it has raised funds", async function () {
+    it("Should not allow a campaign to be cancelled if it has already raised funds and is not complete", async function () {
       //donate to campaign
       const donationAmount = parseEther("5");
       await charityContract.connect(donor1).donateToCampaign(
@@ -446,7 +446,7 @@ describe("CharityDonation", function () {
       //verify that cancelling a completed campaign fails
       await expect(
         charityContract.connect(admin).cancelCampaign(1, owner.address)
-      ).to.be.revertedWith("This Campaign Has Already Raised Funds! Refund First Then Cancel!");
+      ).to.be.revertedWith("This Campaign Has Already Been Completed!");
     });
   });
 });
