@@ -1,15 +1,18 @@
 # CharityDonation Smart Contract
 
-A decentralized charity donation platform that enables transparent fundraising campaigns with multi-admin support, donor tracking, and secure fund management.
+A decentralized charity donation platform built on Ethereum that enables transparent fundraising campaigns with multi-admin support, built-in administrative controls, donor tracking, and secure fund management.
 
 ## Features
 
 - Create and manage fundraising campaigns
+- Accept donations in ETH
 - Multi-admin support for campaign management
 - Secure donation handling and fund management
-- Donor tracking and refund capabilities
+- Automated campaign completion on target achievement
+- Donor tracking and refund mechanism for failed campaigns
 - Campaign lifecycle management (active, completed, cancelled)
-- Transparent withdrawal system
+- Complete transparency with on-chain tracking of donations and withdrawals
+- Campaign cancellation protection when funds are raised
 
 ## Contract Structure
 
@@ -32,6 +35,35 @@ A decentralized charity donation platform that enables transparent fundraising c
    - Amount withdrawn
    - Withdrawal details (by whom, to where)
 
+### Core Components
+
+1. **Campaign Management**
+  - Create campaigns with title, description, target amount, and duration
+  - Automatic completion when target is reached
+  - Deadline enforcement
+  - Campaign cancellation (with protections)
+
+2. **Donation Handling**
+  - Direct ETH donations to campaigns
+  - Automatic campaign completion on target achievement
+  - Tracking of individual donations
+  - Protection against donations to completed/cancelled campaigns
+
+3. **Admin System**
+  - Multiple admin support
+  - Admin addition/removal functionality
+  - Protected administrative actions
+
+4. **Withdrawal Management**
+  - Controlled fund withdrawal system
+  - Multi-admin withdrawal approval
+  - Complete withdrawal tracking
+
+5. **Refund System**
+  - Donor refund functionality for failed campaigns
+  - Protected refund process
+  - Automatic balance tracking
+
 ### Key Functions
 
 #### Campaign Management
@@ -46,7 +78,7 @@ function addCampaignAdmin(address _admin) public
 function removeCampaignAdmin(address _admin) external
 ```
 
-#### Donation Handling
+#### Donation Management
 ```solidity
 function donateToCampaign(address payable _campaignAddress, uint256 _campaignId, uint256 _amount) public payable
 ```
@@ -55,6 +87,27 @@ function donateToCampaign(address payable _campaignAddress, uint256 _campaignId,
 ```solidity
 function withdrawFunds(uint256 _campaignId, address _campaignAddress, uint256 _amount, address payable _to) external
 function refundDonors(uint256 _campaignId, address _campaignAddress) public
+```
+
+#### View Management
+```solidity
+function getCampaignDetails(uint256 _campaignId, address _campaignAddress) public view
+function viewCampaigns() public view
+function viewDonations() public view
+function viewWithdrawals(address _campaignAddress) public view
+```
+
+#### Events 
+The contract emits the following events for tracking:
+```solidity
+event CampaignCreated(uint256 campaign_id, address campaignAddress, string title, uint256 targetAmount, uint256 deadline)
+event DonationReceived(address donor, uint256 amount, address campaignAddress, uint256 campaign_id)
+event FundsWithdrawn(uint256 amount, address by, address to, address from, uint256 campaignId)
+event CampaignCompleted(address campaignAddress, uint256 campaign_id)
+event CampaignCancelled(address campaignAddress, uint256 campaign_id)
+event AddAdmin(address admin)
+event RemoveAdmin(address admin)
+event RefundCampaignDonors(address campaignAddress, uint256 campaignId, address to, uint256 amount)
 ```
 
 ## Test Coverage
@@ -78,6 +131,7 @@ function refundDonors(uint256 _campaignId, address _campaignAddress) public
 - [x] Handle campaign completion on target reached
 - [x] Prevent donations after deadline
 - [x] Prevent donations to cancelled campaigns
+- [x] Prevent donations to completed campaigns
 
 ### Fund Management Tests
 - [x] Withdraw funds from completed campaigns
@@ -91,27 +145,65 @@ function refundDonors(uint256 _campaignId, address _campaignAddress) public
 - [x] Check withdrawal records
 - [x] List campaign admins
 
-## Setup and Testing
+### Campaign Cancellation Tests
+- [x] Cancellation restrictions on completed campaigns
+- [x] Admin-only access
+- [x] Cancellation protection for failed campaigns with existing donations
 
-1. Install dependencies:
+## Test Coverage 
 ```bash
-npm install
+----------------------|----------|----------|----------|----------|
+File                  |  % Stmts | % Branch |  % Funcs |  % Lines |
+----------------------|----------|----------|----------|----------|
+ contracts/           |    100.0 |    100.0 |    100.0 |    100.0 |
+  CharityDonationMain.sol |    100.0 |    100.0 |    100.0 |    100.0 |
+----------------------|----------|----------|----------|----------|
 ```
 
-2. Compile contracts:
+## Development and Testing
+
+### Prerequisites
+- Node.js v14+ and npm
+- Hardhat
+- Ethereum wallet (e.g., MetaMask)
+- Infura or Alchemy RPC and API access
+
+### Setup
+
+1. Clone this repository
+```bash
+git clone <repository-url>
+cd <repository-folder>
+```
+
+2. Install dependencies:
+```bash
+npm install
+npm i dotenv@latest
+```
+
+3. Compile contracts:
 ```bash
 npx hardhat compile
 ```
 
-3. Run tests:
+4. Run tests:
 ```bash
 npx hardhat test
 ```
 
-4. Deploy to local network:
+5. Deploy to local network:
 ```bash
 npx hardhat node
-npx hardhat run scripts/deploy.ts --network localhost
+npx hardhat run scripts/deploy.ts
+```
+
+6. Deploy to testnet or mainnet:
+- Configure network in `hardhat.config.js`
+- Set up environment variables.
+- Deploy contract
+```bash
+npx hardhat run scripts/deploy.js --network <network-name>
 ```
 
 ## Security Considerations
@@ -119,7 +211,7 @@ npx hardhat run scripts/deploy.ts --network localhost
 1. **Access Control**
    - Admin management system
    - Function-level permission checks
-   - Role-based access control for critical functions
+   - Role-based access control and Re-enterancy protection for critical functions
 
 2. **Fund Safety**
    - Secure withdrawal mechanism
